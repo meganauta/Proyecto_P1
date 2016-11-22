@@ -30,15 +30,17 @@ unsigned long codigo_IR[10][3];
 //configuracon global
 void setup() {
   // put your setup code here, to run once:
-  irrecv.enableIRIn();
+  irrecv.enableIRIn(); // Start the receiver
   for(bucle=0; bucle<sizeof(definir_pines_led_display)/sizeof(definir_pines_led_display[0]);bucle++){
     pinMode(definir_pines_led_display[bucle], OUTPUT);
   }
   for(bucle=0; bucle<sizeof(definir_pusadores)/sizeof(definir_pusadores[0]);bucle++){
     pinMode(definir_pusadores[bucle], INPUT);
   }
-  for(bucle=0;bucle<sizeof(codigo_IR)/sizeof(codigo_IR[0]);bucle++){
-    codigo_IR[bucle]=0;
+  for(int x=0;x<3;x++){
+    for(bucle=0;bucle<10;bucle++){
+    codigo_IR[bucle][x]=-1;
+    }
   }
     disp(numero_inicio);
 }
@@ -65,31 +67,110 @@ void imprimir(int numero){
   }  
 }
 
-int decodificando (decode_results *results){
+void decodificando (decode_results *results){
   if(results->overflow){
-    return -1;
+      disp(10);
+      delay(650);
+      disp(11);
+      delay(250);
+      disp(10);
+      delay(650);
+      disp(11);
+      delay(250);
   }
   switch (results->decode_type) {
-    default:
-    case UNKNOWN:      /*Serial.print("UNKNOWN");*/       return -1;    break ;
-    case NEC:          /*Serial.print("NEC");*/           return 0;    break ;
-    case SONY:         /*Serial.print("SONY");*/          return 1;    break ;
-    case RC5:          /*Serial.print("RC5");*/           return 2;    break ;
-    case RC6:          /*Serial.print("RC6");*/           return 3;    break ;
-    case DISH:         /*Serial.print("DISH");*/          return 4;    break ;
-    case SHARP:        /*Serial.print("SHARP");*/         return 5;    break ;
-    case JVC:          /*Serial.print("JVC");*/           return 6;    break ;
-    case SANYO:        /*Serial.print("SANYO");*/         return 7;    break ;
-    case MITSUBISHI:   /*Serial.print("MITSUBISHI");*/    return 8;    break ;
-    case SAMSUNG:      /*Serial.print("SAMSUNG"); */      return 9;    break ;
-    case LG:           /*Serial.print("LG");  */          return 10;    break ;
-    case WHYNTER:      /*Serial.print("WHYNTER"); */      return 11;    break ;
-    case AIWA_RC_T501: /*Serial.print("AIWA_RC_T501"); */ return 12;    break ;
-    case PANASONIC:    /*Serial.print("PANASONIC");  */   return 13;    break ;
-    case DENON:        /*Serial.print("Denon");    */     return 14;    break ;
+    default:          disp(10);
+      delay(650);
+      disp(11);
+      delay(250);
+      disp(10);
+      delay(650);
+      disp(11);
+      delay(250);     break ;
+    case UNKNOWN:      /*Serial.print("UNKNOWN");*/    disp(10);
+      delay(650);
+      disp(11);
+      delay(250);
+      disp(10);
+      delay(650);
+      disp(11);
+      delay(250);    break ;
+    case NEC:          /*Serial.print("NEC");*/    codigo_IR[numero_inicio][0]=0;  codigo_IR[numero_inicio][1]=results->value;         codigo_IR[numero_inicio][2]=results->bits;         break ;
+    case SONY:         /*Serial.print("SONY");*/   codigo_IR[numero_inicio][0]=1;  codigo_IR[numero_inicio][1]=results->value;         codigo_IR[numero_inicio][2]=results->bits;         break ;
+    case RC5:          /*Serial.print("RC5");*/    codigo_IR[numero_inicio][0]=2;  codigo_IR[numero_inicio][1]=results->value;         codigo_IR[numero_inicio][2]=results->bits;         break ;
+    case RC6:          /*Serial.print("RC6");*/    codigo_IR[numero_inicio][0]=3;  codigo_IR[numero_inicio][1]=results->value;         codigo_IR[numero_inicio][2]=results->bits;         break ;
+    case DISH:         /*Serial.print("DISH");*/   codigo_IR[numero_inicio][0]=4;  codigo_IR[numero_inicio][1]=results->value;         codigo_IR[numero_inicio][2]=results->bits;         break ;
+    case SHARP:        /*Serial.print("SHARP");*/  codigo_IR[numero_inicio][0]=5;  codigo_IR[numero_inicio][1]=results->value;         codigo_IR[numero_inicio][2]=results->bits;         break ;
+    case JVC:          /*Serial.print("JVC");*/    codigo_IR[numero_inicio][0]=6;  codigo_IR[numero_inicio][1]=results->value;         codigo_IR[numero_inicio][2]=results->bits;         break ;
+  /*case SANYO:         Serial.print("SANYO");            return 7;    break ;*/
+  /*  case MITSUBISHI:   Serial.print("MITSUBISHI");    return 8;    break ;*/
+    case SAMSUNG:   /*Serial.print("SAMSUNG"); */  codigo_IR[numero_inicio][0]=9;  codigo_IR[numero_inicio][1]=results->value;         codigo_IR[numero_inicio][2]=results->bits;         break ;
+    case LG:           /*Serial.print("LG");  */   codigo_IR[numero_inicio][0]=10;  codigo_IR[numero_inicio][1]=results->value;         codigo_IR[numero_inicio][2]=results->bits;        break ;
+    case WHYNTER:      /*Serial.print("WHYNTER"); */ codigo_IR[numero_inicio][0]=11;  codigo_IR[numero_inicio][1]=results->value;         codigo_IR[numero_inicio][2]=results->bits;        break ;
+    case AIWA_RC_T501: /*Serial.print("AIWA_RC_T501"); */ codigo_IR[numero_inicio][0]=12;  codigo_IR[numero_inicio][1]=results->value;         codigo_IR[numero_inicio][2]=results->bits;   break ;
+    case PANASONIC:    /*Serial.print("PANASONIC");  */codigo_IR[numero_inicio][0]=13;  codigo_IR[numero_inicio][1]=results->address;         codigo_IR[numero_inicio][2]=results->value;   break ;
+    case DENON:        /*Serial.print("Denon");    */    codigo_IR[numero_inicio][0]=14;  codigo_IR[numero_inicio][1]=results->value;         codigo_IR[numero_inicio][2]=results->bits;    break ;
   }
-  return -1;
 }
+
+
+
+
+
+
+
+
+void codificando (int x_value){
+  switch (x_value) {
+    case 0:          /*Serial.print("NEC");*/
+                     irsend.sendNEC(codigo_IR[numero_inicio][1],codigo_IR[numero_inicio][2]);
+    break ;
+    case 1:         /*Serial.print("SONY");*/ 
+                     irsend.sendSony(codigo_IR[numero_inicio][1],codigo_IR[numero_inicio][2]);
+    break ;
+    case 2:          /*Serial.print("RC5");*/ 
+                     irsend.sendRC5(codigo_IR[numero_inicio][1],codigo_IR[numero_inicio][2]);                   
+    break ;
+    case 3:          /*Serial.print("RC6");*/ 
+                     irsend.sendRC6(codigo_IR[numero_inicio][1],codigo_IR[numero_inicio][2]);    
+    break ;
+    case 4:         /*Serial.print("DISH");*/
+                     irsend.sendDISH(codigo_IR[numero_inicio][1],codigo_IR[numero_inicio][2]);
+    break ;
+    case 5:        /*Serial.print("SHARP");*/  
+                     irsend.sendSharp(codigo_IR[numero_inicio][1],codigo_IR[numero_inicio][2]);    
+    break ;
+    case 6:          /*Serial.print("JVC");*/  
+                      irsend.sendJVC(codigo_IR[numero_inicio][1],codigo_IR[numero_inicio][2],0);   
+    break ;
+    /*case 7:        Serial.print("SANYO");
+                     irsend.sendSANYO(codigo_IR[numero_inicio][1],codigo_IR[numero_inicio][2]);  
+    break ;*/
+    /*case 8:   /*Serial.print("MITSUBISHI");*/ 
+    //                  irsend.sendMITSUBISHI(codigo_IR[numero_inicio][1],codigo_IR[numero_inicio][2]); 
+   // break ;
+    case 9:      /*Serial.print("SAMSUNG"); */  
+                      irsend.sendSAMSUNG(codigo_IR[numero_inicio][1],codigo_IR[numero_inicio][2]);
+    break ;
+    case 10:           /*Serial.print("LG");  */            
+                         irsend.sendLG(codigo_IR[numero_inicio][1],codigo_IR[numero_inicio][2]);
+    break ;
+    case 11:      /*Serial.print("WHYNTER"); */         
+                         irsend.sendWhynter(codigo_IR[numero_inicio][1],codigo_IR[numero_inicio][2]);
+    break ;
+    case 12: /*Serial.print("AIWA_RC_T501"); */       
+                         irsend.sendAiwaRCT501(codigo_IR[numero_inicio][1]);
+    break ;
+    case 13:    /*Serial.print("PANASONIC");  */    
+                         irsend.sendPanasonic(codigo_IR[numero_inicio][1],codigo_IR[numero_inicio][2]);
+    break ;
+    case 14:        /*Serial.print("Denon");    */   
+                         irsend.sendDenon(codigo_IR[numero_inicio][1],codigo_IR[numero_inicio][2]);
+    break ;
+  }
+}
+
+
 
 void loop() {
   bool pulsador_grabar;
@@ -133,34 +214,34 @@ void loop() {
   if(pulsador_grabar){
     //codigo recibir y guardar IR
     disp(11);
+    decode_results  results;
     do{
     decode_results  results;
-    }while(!irrecv.decode(&results))//decode devuelbe true o flase si ingreso un pulso IR y si es valido
-    if(decodificando(&results)<0){
-      disp(10);
-      delay(650);
+    }while(!irrecv.decode(&results));//decode devuelbe true o flase si ingreso un pulso IR y si es valido
+    
+      disp(numero_inicio);
+      decodificando(&results);
+      delay(150);
       disp(11);
-      delay(250);
+      delay(150);
+    }
+    //podria ingresarse codigo para guardar los datos en la EEPROM
+  if(pulsador_ok){
+    //codigo leer y enviar IR
+    if(codigo_IR[numero_inicio][0]<0){
       disp(10);
-      delay(650);
+      delay(150);
       disp(11);
-      delay(250);
+      delay(750);
     }
     else{
+      codificando(codigo_IR[numero_inicio][0]);
       disp(numero_inicio);
-      codigo_IR[numero_inicio][0]=decodificando(&results);
-      if(decodificando(&results)==13){
-         codigo_IR[numero_inicio][1]=results->address;
-         codigo_IR[numero_inicio][2]=results->value;
-      }
-      else{
-        codigo_IR[numero_inicio][1]=results->value;
-        codigo_IR[numero_inicio][2]=results->results->bits;
-      }
+      delay(150);
+      disp(11);
+      delay(150);
     }
-    disp(numero_inicio);
   }
-  if(pulsador_ok){
-    //codigo leer EEPROM y enviar IR
-  }
+  disp(numero_inicio);
+  irrecv.resume();
 }
