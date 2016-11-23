@@ -1,6 +1,6 @@
 #include <IRremote.h>  //librerias para el IR
 IRsend irsend; //Configurado por la libreria (en arduino mega 2560 esta en el pin 9
-IRrecv irrecv(10);
+IRrecv irrecv(11);
 
 //Encendido y apagado de el led de 7 segmentos
 bool n[12][4]={ {0,0,0,0},
@@ -31,18 +31,21 @@ unsigned long codigo_IR[10][3];
 void setup() {
   // put your setup code here, to run once:
   irrecv.enableIRIn(); // Start the receiver
+  
+
+  Serial.begin(9600);   // Status message will be sent to PC at 9600 baud
+  
   for(bucle=0; bucle<sizeof(definir_pines_led_display)/sizeof(definir_pines_led_display[0]);bucle++){
     pinMode(definir_pines_led_display[bucle], OUTPUT);
   }
   for(bucle=0; bucle<sizeof(definir_pusadores)/sizeof(definir_pusadores[0]);bucle++){
     pinMode(definir_pusadores[bucle], INPUT);
   }
-  for(int x=0;x<3;x++){
-    for(bucle=0;bucle<10;bucle++){
-    codigo_IR[bucle][x]=-1;
+  for(int x=0;x<10;x++){
+    for(bucle=0;bucle<3;bucle++){
+    codigo_IR[x][bucle]=111;
     }
   }
-    disp(numero_inicio);
 }
 
 void disp(int number){
@@ -57,6 +60,8 @@ void disp(int number){
     case 7:    imprimir(7);    break;
     case 8:    imprimir(8);    break;
     case 9:    imprimir(9);    break; 
+    case 10:    imprimir(10);    break; 
+    case 11:    imprimir(11);    break; 
   }
 }
 
@@ -68,7 +73,9 @@ void imprimir(int numero){
 }
 
 void decodificando (decode_results *results){
+  Serial.println("decoded");
   if(results->overflow){
+    Serial.println("overflow");
       disp(10);
       delay(650);
       disp(11);
@@ -80,6 +87,7 @@ void decodificando (decode_results *results){
   }
   switch (results->decode_type) {
     default:          disp(10);
+    Serial.println("no encontrado");
       delay(650);
       disp(11);
       delay(250);
@@ -88,6 +96,7 @@ void decodificando (decode_results *results){
       disp(11);
       delay(250);     break ;
     case UNKNOWN:      /*Serial.print("UNKNOWN");*/    disp(10);
+    Serial.println("desconocido");
       delay(650);
       disp(11);
       delay(250);
@@ -95,21 +104,19 @@ void decodificando (decode_results *results){
       delay(650);
       disp(11);
       delay(250);    break ;
-    case NEC:          /*Serial.print("NEC");*/    codigo_IR[numero_inicio][0]=0;  codigo_IR[numero_inicio][1]=results->value;         codigo_IR[numero_inicio][2]=results->bits;         break ;
-    case SONY:         /*Serial.print("SONY");*/   codigo_IR[numero_inicio][0]=1;  codigo_IR[numero_inicio][1]=results->value;         codigo_IR[numero_inicio][2]=results->bits;         break ;
-    case RC5:          /*Serial.print("RC5");*/    codigo_IR[numero_inicio][0]=2;  codigo_IR[numero_inicio][1]=results->value;         codigo_IR[numero_inicio][2]=results->bits;         break ;
-    case RC6:          /*Serial.print("RC6");*/    codigo_IR[numero_inicio][0]=3;  codigo_IR[numero_inicio][1]=results->value;         codigo_IR[numero_inicio][2]=results->bits;         break ;
-    case DISH:         /*Serial.print("DISH");*/   codigo_IR[numero_inicio][0]=4;  codigo_IR[numero_inicio][1]=results->value;         codigo_IR[numero_inicio][2]=results->bits;         break ;
-    case SHARP:        /*Serial.print("SHARP");*/  codigo_IR[numero_inicio][0]=5;  codigo_IR[numero_inicio][1]=results->value;         codigo_IR[numero_inicio][2]=results->bits;         break ;
-    case JVC:          /*Serial.print("JVC");*/    codigo_IR[numero_inicio][0]=6;  codigo_IR[numero_inicio][1]=results->value;         codigo_IR[numero_inicio][2]=results->bits;         break ;
-  /*case SANYO:         Serial.print("SANYO");            return 7;    break ;*/
-  /*  case MITSUBISHI:   Serial.print("MITSUBISHI");    return 8;    break ;*/
-    case SAMSUNG:   /*Serial.print("SAMSUNG"); */  codigo_IR[numero_inicio][0]=9;  codigo_IR[numero_inicio][1]=results->value;         codigo_IR[numero_inicio][2]=results->bits;         break ;
-    case LG:           /*Serial.print("LG");  */   codigo_IR[numero_inicio][0]=10;  codigo_IR[numero_inicio][1]=results->value;         codigo_IR[numero_inicio][2]=results->bits;        break ;
-    case WHYNTER:      /*Serial.print("WHYNTER"); */ codigo_IR[numero_inicio][0]=11;  codigo_IR[numero_inicio][1]=results->value;         codigo_IR[numero_inicio][2]=results->bits;        break ;
-    case AIWA_RC_T501: /*Serial.print("AIWA_RC_T501"); */ codigo_IR[numero_inicio][0]=12;  codigo_IR[numero_inicio][1]=results->value;         codigo_IR[numero_inicio][2]=results->bits;   break ;
-    case PANASONIC:    /*Serial.print("PANASONIC");  */codigo_IR[numero_inicio][0]=13;  codigo_IR[numero_inicio][1]=results->address;         codigo_IR[numero_inicio][2]=results->value;   break ;
-    case DENON:        /*Serial.print("Denon");    */    codigo_IR[numero_inicio][0]=14;  codigo_IR[numero_inicio][1]=results->value;         codigo_IR[numero_inicio][2]=results->bits;    break ;
+    case NEC:      Serial.println("NEC");    codigo_IR[numero_inicio][0]=0;  codigo_IR[numero_inicio][1]=results->value;         codigo_IR[numero_inicio][2]=results->bits;         break ;
+    case SONY:         Serial.println("SONY");   codigo_IR[numero_inicio][0]=1;  codigo_IR[numero_inicio][1]=results->value;         codigo_IR[numero_inicio][2]=results->bits;         break ;
+    case RC5:         Serial.println("RC5");    codigo_IR[numero_inicio][0]=2;  codigo_IR[numero_inicio][1]=results->value;         codigo_IR[numero_inicio][2]=results->bits;         break ;
+    case RC6:         Serial.println("RC6");    codigo_IR[numero_inicio][0]=3;  codigo_IR[numero_inicio][1]=results->value;         codigo_IR[numero_inicio][2]=results->bits;         break ;
+    case DISH:         Serial.println("DISH");   codigo_IR[numero_inicio][0]=4;  codigo_IR[numero_inicio][1]=results->value;         codigo_IR[numero_inicio][2]=results->bits;         break ;
+    case SHARP:       Serial.println("SHARP");  codigo_IR[numero_inicio][0]=5;  codigo_IR[numero_inicio][1]=results->value;         codigo_IR[numero_inicio][2]=results->bits;         break ;
+    case JVC:          Serial.println("JVC");    codigo_IR[numero_inicio][0]=6;  codigo_IR[numero_inicio][1]=results->value;         codigo_IR[numero_inicio][2]=results->bits;         break ;
+    case SAMSUNG:   Serial.println("SAMSUNG");   codigo_IR[numero_inicio][0]=9;  codigo_IR[numero_inicio][1]=results->value;         codigo_IR[numero_inicio][2]=results->bits;         break ;
+    case LG:           Serial.println("LG");     codigo_IR[numero_inicio][0]=10;  codigo_IR[numero_inicio][1]=results->value;         codigo_IR[numero_inicio][2]=results->bits;        break ;
+    case WHYNTER:      Serial.println("WHYNTER");  codigo_IR[numero_inicio][0]=11;  codigo_IR[numero_inicio][1]=results->value;         codigo_IR[numero_inicio][2]=results->bits;        break ;
+    case AIWA_RC_T501: Serial.println("AIWA_RC_T501"); codigo_IR[numero_inicio][0]=12;  codigo_IR[numero_inicio][1]=results->value;         codigo_IR[numero_inicio][2]=results->bits;   break ;
+    case PANASONIC:    Serial.println("PANASONIC"); codigo_IR[numero_inicio][0]=13;  codigo_IR[numero_inicio][1]=results->address;         codigo_IR[numero_inicio][2]=results->value;   break ;
+    case DENON:        Serial.println("Denon");       codigo_IR[numero_inicio][0]=14;  codigo_IR[numero_inicio][1]=results->value;         codigo_IR[numero_inicio][2]=results->bits;    break ;
   }
 }
 
@@ -121,6 +128,10 @@ void decodificando (decode_results *results){
 
 
 void codificando (int x_value){
+  Serial.println("coded");
+      Serial.println(codigo_IR[numero_inicio][0]);
+      Serial.println(codigo_IR[numero_inicio][1]);
+      Serial.println(codigo_IR[numero_inicio][2]);
   switch (x_value) {
     case 0:          /*Serial.print("NEC");*/
                      irsend.sendNEC(codigo_IR[numero_inicio][1],codigo_IR[numero_inicio][2]);
@@ -173,6 +184,10 @@ void codificando (int x_value){
 
 
 void loop() {
+
+      Serial.println("numero inicio");
+      Serial.println(numero_inicio);
+    disp(numero_inicio);
   bool pulsador_grabar;
   bool pulsador_up;
   bool pulsador_down;
@@ -183,18 +198,14 @@ void loop() {
      pulsador_grabar=digitalRead(definir_pusadores[2]);
      pulsador_ok=digitalRead(definir_pusadores[3]);
 
-    //si los botones estan aplastados al mismo tiempo
-    if(!pulsador_grabar||!pulsador_ok){
-      pulsador_grabar=0;
-      pulsador_ok=0;
-    }
     if(!pulsador_up||!pulsador_down){
-      
       //Aumentar o disminuir la cifra
       if(pulsador_up){
+        Serial.println("up");
         numero_inicio++;
       }
         if(pulsador_down){
+          Serial.println("down");
           numero_inicio--;
       }
     }
@@ -210,34 +221,47 @@ void loop() {
     disp(numero_inicio);
     delay(250);
     //bucle hasta que se presione ok o grabar pero no ambos
-  }while(!pulsador_grabar&&!pulsador_ok);
+  }while(!(pulsador_ok||pulsador_grabar)||(pulsador_ok&&pulsador_grabar));
+      Serial.println("numero inicio_salir_ciclo");
+      Serial.println(numero_inicio);
+  
   if(pulsador_grabar){
+    Serial.println("Grabar");
     //codigo recibir y guardar IR
     disp(11);
     decode_results  results;
-    do{
-    decode_results  results;
-    }while(!irrecv.decode(&results));//decode devuelbe true o flase si ingreso un pulso IR y si es valido
-    
-      disp(numero_inicio);
+    while(!irrecv.decode(&results)){
+      
+      decode_results  results;
+    }
       decodificando(&results);
+      Serial.println("1---+++");
+      Serial.println(codigo_IR[numero_inicio][0]);
+      Serial.println(codigo_IR[numero_inicio][1]);
+      Serial.println(codigo_IR[numero_inicio][2]);
+      disp(numero_inicio);
       delay(150);
       disp(11);
       delay(150);
-    }
+  }
     //podria ingresarse codigo para guardar los datos en la EEPROM
   if(pulsador_ok){
     //codigo leer y enviar IR
-    if(codigo_IR[numero_inicio][0]<0){
+    
+    Serial.println("puls OK");
+    Serial.println(codigo_IR[numero_inicio][0]);
+    if(codigo_IR[numero_inicio][0]==111){
       disp(10);
-      delay(150);
+      delay(550);
       disp(11);
-      delay(750);
+      delay(550);
+      disp(10);
+      delay(550);
+      disp(11);
+      delay(550);
     }
     else{
       codificando(codigo_IR[numero_inicio][0]);
-      disp(numero_inicio);
-      delay(150);
       disp(11);
       delay(150);
     }
