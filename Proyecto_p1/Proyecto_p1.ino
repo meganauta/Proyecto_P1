@@ -231,7 +231,10 @@ void loop() {
     disp(11);
     decode_results  results;
     while(!irrecv.decode(&results)){
-      
+      pulsador_grabar=digitalRead(definir_pusadores[2]);
+      if(pulsador_grabar){
+        goto salir;
+      }
       decode_results  results;
     }
       decodificando(&results);
@@ -241,6 +244,7 @@ void loop() {
       Serial.println(codigo_IR[numero_inicio][2]);
       disp(numero_inicio);
       delay(150);
+      salir:
       disp(11);
       delay(150);
   }
