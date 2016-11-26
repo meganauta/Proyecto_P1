@@ -230,21 +230,20 @@ void loop() {
     //codigo recibir y guardar IR
     disp(11);
     decode_results  results;
-    while(!irrecv.decode(&results)){
-      pulsador_grabar=digitalRead(definir_pusadores[2]);
-      if(pulsador_grabar){
-        goto salir;
-      }
+    while(!irrecv.decode(&results)||((pulsador_grabar=digitalRead(definir_pusadores[2]))==0)){
       decode_results  results;
     }
+    if(pulsador_grabar){
+        goto salir;
+      }
       decodificando(&results);
       Serial.println("1---+++");
       Serial.println(codigo_IR[numero_inicio][0]);
       Serial.println(codigo_IR[numero_inicio][1]);
       Serial.println(codigo_IR[numero_inicio][2]);
+      salir:
       disp(numero_inicio);
       delay(150);
-      salir:
       disp(11);
       delay(150);
   }
