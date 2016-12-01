@@ -229,9 +229,12 @@ void loop() {
     Serial.println("Grabar");
     //codigo recibir y guardar IR
     disp(11);
+    delay(550);
+    pulsador_grabar=digitalRead(definir_pusadores[2]);
     decode_results  results;
-    while(!irrecv.decode(&results)||((pulsador_grabar=digitalRead(definir_pusadores[2]))==0)){
+    while(!irrecv.decode(&results)&&(pulsador_grabar==0)){
       decode_results  results;
+      pulsador_grabar=digitalRead(definir_pusadores[2]);
     }
     if(pulsador_grabar){
         goto salir;
